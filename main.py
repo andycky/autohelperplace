@@ -3,7 +3,7 @@ import configparser
 from selenium import webdriver
 from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 import time
 
 from selenium.webdriver.common.by import By
@@ -23,9 +23,9 @@ def main():
 
     chrome = webdriver.Chrome('./chromedriver', chrome_options=options)
 
+    chrome.get("https://web.whatsapp.com/")
+    time.sleep(12)
     chrome.get("https://www.helperplace.com/")
-    time.sleep(8)
-    chrome.get("https://wa.me/")
     time.sleep(4)
 
     login = chrome.find_element(By.XPATH, '//*[@id="togglebtn"]/ul/li[7]/a')
@@ -132,8 +132,8 @@ def handle_helper_link(chrome, helperLink, page):
     time.sleep(5)
     name = chrome.find_element(By.CLASS_NAME, "product-detail").find_element(By.XPATH, "h1").text
     subtitle = chrome.find_element(By.CLASS_NAME, 'listing-about-sub-title').text
-    position = chrome.find_element(By.CLASS_NAME, 'footer-experience').find_element(By.XPATH, "i").text.split("|")[0]
-    contract = chrome.find_element(By.CLASS_NAME, 'footer-experience').find_element(By.XPATH, "i").text.split("|")[1]
+    position = chrome.find_element(By.CLASS_NAME, 'footer-experience').find_element(By.XPATH, "i").text
+    #contract = chrome.find_element(By.CLASS_NAME, 'footer-experience').find_element(By.XPATH, "i").text.split("|")[1]
     #numofexp = chrome.find_element(By.XPATH,
     #                               '/html/body/section/app-root/app-resumeview/section/section[2]/div/div[2]/div[1]/div/div/div/div/div[3]/div/div[2]/div[1]/h3').text
     salaryText = chrome.find_element(By.XPATH, "//*[contains(text(),'Salary:')]")
@@ -154,27 +154,31 @@ def handle_helper_link(chrome, helperLink, page):
     except:
         salary = 10000
     print("name="+name)
-    print("position="+position)
-    print("contract="+contract)
     print("nationality="+nationality)
     print("salary="+str(salary))
 
     if salary > 6000:
         print("\n******** Skip for high salary! ********\n")
     else:
-        contactBtn = chrome.find_element(By.XPATH, "//*[@title='Contact Candidate']")
-        contactBtn.click()
-        time.sleep(1)
-        calltab = chrome.find_element(By.XPATH, '// *[@id="calling-tab"]')
-        calltab.click()
-        time.sleep(1)
-        callBtn = chrome.find_element(By.XPATH, '// *[@id="calling-btn"]/li/a/span')
-        callBtn.click()
-        time.sleep(1)
-        msg = 'Hello ' + name + '!\nAre you looking for job?\nI have some Ma\'am is finding a ' + nationality + ' ' + position + '.\nThey are very interested to your profile.\n\nTo better present you to Ma\'am, I want you to fill up the form to let Ma\'am know you more.'
-        msg += 'Or you may whatsapp me, +852 52768846 to discuss if you have more wish'
-        chrome.find_element(By.XPATH, '//*[@id="message"]/div[1]/textarea').send_keys(msg)
+        #contactBtn = chrome.find_element(By.XPATH, "//*[@title='Contact Candidate']")
+        #contactBtn.click()
+        #time.sleep(1)
+        #calltab = chrome.find_element(By.XPATH, '// *[@id="calling-tab"]')
+        #calltab.click()
+        #time.sleep(1)
+        #mobile = chrome.find_element(By.CLASS_NAME, "calling-btn").find_element(By.XPATH, "li/a/span").text.replace("=","").replace("-","")
+        #print("mobile="+mobile)
+        chrome.get("https://web.whatsapp.com/send/?phone=85290421186&text&type=phone_number&app_absent=0")
+        time.sleep(10)
+        chrome.find_element(By.XPATH, '//*[@title = "Type a message"]/p').send_keys("Hi "+name+ "Are you looking for job?")
         time.sleep(2)
+        chrome.find_element(By.XPATH, '//*[@data-testid = "send"]/..').click()
+
+        #msg = 'Hello ' + name + '!\nAre you looking for job?\nI have some Ma\'am is finding a ' + nationality + ' ' + position + '.\nThey are very interested to your profile.\n\nTo better present you to Ma\'am, I want you to fill up the form to let Ma\'am know you more.'
+
+        #msg += 'Or you may whatsapp me, +852 52768846 to discuss if you have more wish'
+        #chrome.find_element(By.XPATH, '//*[@id="message"]/div[1]/textarea').send_keys(msg)
+        #time.sleep(2)
         if not test:
             contactSendBtn = chrome.find_element(By.XPATH, '// *[ @ id = "message"] / div[4] / button[2]')
             contactSendBtn.click()
