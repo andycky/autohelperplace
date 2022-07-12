@@ -1,5 +1,8 @@
+from typing import Any
+
 import configparser
 import sqlite3
+import sys
 
 from selenium import webdriver
 from selenium.common import NoSuchElementException
@@ -10,9 +13,12 @@ import time
 from selenium.webdriver.common.by import By
 
 test = True
-case = 0
+global case
 
 def main():
+
+    global case
+    case = 0
 
     config = configparser.ConfigParser()
     config.read('config/config.properties')
@@ -47,7 +53,7 @@ def main():
     #filter(chrome)
     #time.sleep(5)
     #numOfPage = int(pageLinks[len(pageLinks) - 2].text)
-    go_page(chrome, 4)
+    go_page(chrome, 0)
 
 
 def go_chrome(chrome,page):
@@ -115,32 +121,34 @@ def go_page(chrome, page):
             print("direct="+direct)
             print("rows="+str(rows))
 
-            if direct.find("Direct") == -1:
+            if rows > 0:
+                print("\n******** Contacted! DB found ********\n")
+            elif direct.find("Direct") == -1:
                 print("\n******** Skip for Agent! ********\n")
+                cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
+                cursorObj.execute("INSERT INTO helperlinks VALUES('"+helperLink+"')")
+                con.commit()
             elif contractText.find("Break") > -1:
                 print("\n******** Skip for contract break! ********\n")
-            elif rows > 0:
-                print("\n******** Contacted! DB found ********\n")
+                cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
+                cursorObj.execute("INSERT INTO helperlinks VALUES('"+helperLink+"')")
+                con.commit()
             elif contacted.find("Contacted") > -1:
                 print("\n******** Contacted! ********\n")
+                cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
+                cursorObj.execute("INSERT INTO helperlinks VALUES('"+helperLink+"')")
+                con.commit()
             else:
                 print("Not Contacted!")
-
-
-
 
                 handle_helper_link(chrome, helperLink, page)
 
                 cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
                 cursorObj.execute("INSERT INTO helperlinks VALUES('"+helperLink+"')")
                 con.commit()
-                print("db ok")
 
     #find next page
     go_page(chrome, page+1)
-
-
-
 
 
 def handle_helper_link(chrome, helperLink, page):
@@ -202,6 +210,11 @@ def handle_helper_link(chrome, helperLink, page):
         #    contactSendBtn = chrome.find_element(By.XPATH, '// *[ @ id = "message"] / div[4] / button[2]')
         #    contactSendBtn.click()
         print("Msg Sent!")
+        global case
+        case = case + 1
+        print("case="+str(case))
+        if case >= 5:
+            sys.exit()
         time.sleep(4)
 
     chrome.back()
