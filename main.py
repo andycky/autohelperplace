@@ -1,4 +1,5 @@
 import configparser
+import sqlite3
 
 from selenium import webdriver
 from selenium.common import NoSuchElementException
@@ -21,10 +22,10 @@ def main():
     #options.add_argument('--headless')
     options.add_argument("--window-size=1920,1080")
 
-    chrome = webdriver.Chrome('./chromedriver', chrome_options=options)
+    chrome = webdriver.Chrome('./chromedriver.exe', chrome_options=options)
 
-    chrome.get("https://web.whatsapp.com/")
-    time.sleep(12)
+    #chrome.get("https://web.whatsapp.com/")
+    #time.sleep(12)
     chrome.get("https://www.helperplace.com/")
     time.sleep(4)
 
@@ -101,22 +102,40 @@ def go_page(chrome, page):
                 contacted = "No Contact"
                                                           # ""'candidate-detail-block/div/div[1]/div[2]/a/div[1]').text
             direct = helperElement.find_element(By.XPATH, 'candidate-detail-block/div/div[1]/div[1]/div/label/span').text
+            helperLink = helperElement.find_element(By.XPATH, 'candidate-detail-block/div/div[1]/div[2]/a').get_attribute("href")
+
+            con = sqlite3.connect('autohelperplace.db')
+            cursorObj = con.cursor()
+            cursorObj.execute("SELECT * FROM helperlinks where link='" + helperLink + "'")
+            rows = len(cursorObj.fetchall())
 
             print("name="+name)
             print("contractText="+contractText)
             print("contacted="+contacted)
             print("direct="+direct)
+            print("rows="+str(rows))
 
             if direct.find("Direct") == -1:
                 print("\n******** Skip for Agent! ********\n")
             elif contractText.find("Break") > -1:
                 print("\n******** Skip for contract break! ********\n")
+            elif rows > 0:
+                print("\n******** Contacted! DB found ********\n")
             elif contacted.find("Contacted") > -1:
                 print("\n******** Contacted! ********\n")
             else:
                 print("Not Contacted!")
-                helperLink = helperElement.find_element(By.XPATH, 'candidate-detail-block/div/div[1]/div[2]/a').get_attribute("href")
+
+
+
+
                 handle_helper_link(chrome, helperLink, page)
+
+                cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
+                cursorObj.execute("INSERT INTO helperlinks VALUES('"+helperLink+"')")
+                con.commit()
+                print("db ok")
+
     #find next page
     go_page(chrome, page+1)
 
@@ -168,20 +187,20 @@ def handle_helper_link(chrome, helperLink, page):
         #time.sleep(1)
         #mobile = chrome.find_element(By.CLASS_NAME, "calling-btn").find_element(By.XPATH, "li/a/span").text.replace("=","").replace("-","")
         #print("mobile="+mobile)
-        chrome.get("https://web.whatsapp.com/send/?phone=85290421186&text&type=phone_number&app_absent=0")
-        time.sleep(10)
-        chrome.find_element(By.XPATH, '//*[@title = "Type a message"]/p').send_keys("Hi "+name+ "Are you looking for job?")
-        time.sleep(2)
-        chrome.find_element(By.XPATH, '//*[@data-testid = "send"]/..').click()
+
+        #chrome.get("https://web.whatsapp.com/send/?phone=85290421186&text&type=phone_number&app_absent=0")
+        #time.sleep(10)
+        #chrome.find_element(By.XPATH, '//*[@title = "Type a message"]/p').send_keys("Hi "+name+ "Are you looking for job?")
+        #time.sleep(2)
+        #chrome.find_element(By.XPATH, '//*[@data-testid = "send"]/..').click()
 
         #msg = 'Hello ' + name + '!\nAre you looking for job?\nI have some Ma\'am is finding a ' + nationality + ' ' + position + '.\nThey are very interested to your profile.\n\nTo better present you to Ma\'am, I want you to fill up the form to let Ma\'am know you more.'
-
         #msg += 'Or you may whatsapp me, +852 52768846 to discuss if you have more wish'
         #chrome.find_element(By.XPATH, '//*[@id="message"]/div[1]/textarea').send_keys(msg)
         #time.sleep(2)
-        if not test:
-            contactSendBtn = chrome.find_element(By.XPATH, '// *[ @ id = "message"] / div[4] / button[2]')
-            contactSendBtn.click()
+        #if not test:
+        #    contactSendBtn = chrome.find_element(By.XPATH, '// *[ @ id = "message"] / div[4] / button[2]')
+        #    contactSendBtn.click()
         print("Msg Sent!")
         time.sleep(4)
 
