@@ -31,22 +31,27 @@ def main():
     config.read('config/config.properties')
 
     options = Options()
-    options.add_argument("--disable-notifications")
-    options.add_argument('--headless')
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("user-agent=User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
+    #options.add_argument("--disable-notifications")
+    #options.add_argument('--headless')
+    #options.add_argument("--window-size=1920,1080")
+    options.add_argument('--ignore-ssl-errors=yes')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    #options.add_argument("user-agent=User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
 
-
-    chrome = webdriver.Chrome('./chromedriver', chrome_options=options)
+    chrome = webdriver.Remote(command_executor='http://192.168.1.120:4444/wd/hub', options=options)
+    chrome.maximize_window()
+    #Chrome('./chromedriver_linux', chrome_options=options)
 
     chrome.get("https://web.whatsapp.com/")
     time.sleep(3)
-    chrome.save_screenshot('whatsapp.png')
+    #chrome.save_screenshot('whatsapp.png')
     time.sleep(18)
     #os.unlink('whatsapp.png')
     chrome.get("https://www.helperplace.com/")
     time.sleep(4)
-    chrome.save_screenshot('whatsapp.png')
+    #chrome.save_screenshot('whatsapp.png')
 
     login = chrome.find_element(By.XPATH, '//*[@id="togglebtn"]/ul/li[7]/a')
     login.click()
@@ -91,7 +96,7 @@ def go_page(chrome, page):
     pagination = chrome.find_element(By.CLASS_NAME, 'pagination').find_elements(By.XPATH, 'li')
     numOfPage = pagination[len(pagination) - 2].text
 #        print("numOfPage=" + numOfPage)
-    print("\n\nBrowsing page" + str(page)+" of "+str(numOfPage)+"\n\n")
+    print("\n\nBrowsing page " + str(page)+" of "+str(numOfPage)+"\n\n")
 
     helpers = chrome.find_element(By.CLASS_NAME, "container-fluid").find_elements(By.XPATH, "div/div")
     #By.XPATH,
@@ -100,7 +105,7 @@ def go_page(chrome, page):
     for helperNum in range(len(helpers)):
 
         if helperNum != 5:
-            print("\nListing in page " + str(page + 1) + " of " +numOfPage+ ", helperNum="+str(helperNum) + " of " + str(len(helpers)))
+            print("\nListing in page " + str(page) + " of " +numOfPage+ ", helperNum="+str(helperNum) + " of " + str(len(helpers)))
             try:
                 helperElement= chrome.find_element(By.CLASS_NAME, "container-fluid").find_elements(By.XPATH, "div/div")[helperNum]
             except:
@@ -253,7 +258,8 @@ def wait_for_time():
     case = 0
     hour = datetime.datetime.now().hour
     while hour != 8 and hour != 22:
+        hour = datetime.datetime.now().hour
         print("now is " + str(hour) + " o'clock...waiting")
-        time.sleep(3600)
+        time.sleep(600)
     print("now is " + str(hour) + " o'clock...start again")
 main()
