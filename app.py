@@ -46,38 +46,16 @@ def main():
     options.add_argument('user-agent={0}'.format(user_agent))
     #options.add_argument("user-agent=User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
 
-    chrome = webdriver.Remote(command_executor='http://20.205.106.141:4444/wd/hub', options=options)
+    chrome = webdriver.Remote(command_executor='http://20.205.106.141:4445/wd/hub', options=options)
     chrome.maximize_window()
     #Chrome('./chromedriver_linux', chrome_options=options)
+
+
 
     chrome.get("https://web.whatsapp.com/")
     time.sleep(3)
     #chrome.save_screenshot('whatsapp.png')
     time.sleep(32)
-    #os.unlink('wdocker hatsapp.png')
-    chrome.get("https://www.helperplace.com/")
-    time.sleep(4)
-    #chrome.save_screenshot('whatsapp.png')
-
-    login = chrome.find_element(By.XPATH, '//*[@id="togglebtn"]/ul/li[7]/a')
-    login.click()
-
-    time.sleep(2)
-
-    email = chrome.find_element(By.XPATH, '//*[@id="pills-home"]/div/div[1]/input')
-    email.send_keys("amberyuen@gmail.com")
-
-    password = chrome.find_element(By.XPATH, '//*[@id="pills-home"]/div/div[2]/input')
-    password.send_keys("amber1982")
-
-    button = chrome.find_element(By.XPATH, '//*[@id="pills-home"]/div/div[5]/button')
-    button.click()
-    time.sleep(3)
-    #chrome.get('https://www.helperplace.com/candidate-shortlist/all?page=1')
-    #filter(chrome)
-    #time.sleep(5)
-    #numOfPage = int(pageLinks[len(pageLinks) - 2].text)
-    go_page(chrome, 1)
 
 
 def go_chrome(chrome, page):
@@ -111,7 +89,7 @@ def go_page(chrome, page):
     for helperNum in range(len(helpers)):
 
         if helperNum != 5:
-            print("\nListing in page " + str(page) + " of " +numOfPage+ ", helperNum "+str(helperNum+0) + " of " + str(len(helpers)))
+            print("\nListing in page " + str(page) + " of " +numOfPage+ ", helperNum="+str(helperNum) + " of " + str(len(helpers)))
             try:
                 helperElement= chrome.find_element(By.CLASS_NAME, "container-fluid").find_elements(By.XPATH, "div/div")[helperNum]
             except:
@@ -215,20 +193,13 @@ def handle_helper_link(chrome, helperLink, page):
         cursorObj.execute("INSERT INTO helperlinks VALUES('" + helperLink + "', TIME(),'SALARY_HIGH')")
         con.commit()
 
-
-    elif nationality.find("Filipino")==-1 and nationality.find("Indonesia")==-1:
-
-        print("\n******** Skip for non-F and non-I ********\n")
-        cursorObj.execute("INSERT INTO helperlinks VALUES('" + helperLink + "', TIME(),'NOT_F_I')")
-        con.commit()
-
     else:
         contactBtn = chrome.find_element(By.XPATH, "//*[@title='Contact Candidate']")
         contactBtn.click()
-        time.sleep(4)
+        time.sleep(1)
         calltab = chrome.find_element(By.XPATH, '// *[@id="calling-tab"]')
         calltab.click()
-        time.sleep(4)
+        time.sleep(1)
         mobile = chrome.find_element(By.CLASS_NAME, "calling-btn").find_element(By.XPATH, "li/a/span").text.replace("=","").replace("-","")
         print("mobile="+mobile)
         try:

@@ -23,11 +23,11 @@ RUN pip install --no-cache -r requirements.txt
 #RUN apk del gcc musl-dev git g++ openssh hdf5 hdf5-dev
 
 #VOLUME ["/usr/src/app/extracted"]
-COPY ./ ./
+#COPY ./ ./
 #RUN mkdir extracted
 #COPY config/ ./
 #RUN ["chmod", "+x", "/usr/src/app/extract.sh"]
 #RUN ["chmod", "+x", "/usr/src/app/generate.sh"]
-CMD ["python", "/usr/src/app/main.py"]
+CMD ["python","-u", "/usr/src/app/main.py"]
 #RUN python3 ./extract.py
 #RUN python3 ./generate.py
