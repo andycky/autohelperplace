@@ -8,5 +8,5 @@ docker stop autohelper
 docker rm autohelper
 docker build -t autohelper .
 docker run -d -v /home/andy/autohelperplace:/usr/src/app --name autohelper autohelper
-#docker exec -it autohelper python /usr/src/app/app.py
+#docker exec -it autohelper python /usr/src/app/app2.py
 docker logs -f autohelper

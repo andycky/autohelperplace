@@ -6,8 +6,6 @@ from typing import Any
 import configparser
 import sqlite3
 import sys
-import pytz
-from flask import Flask
 
 from selenium import webdriver
 from selenium.common import NoSuchElementException
@@ -20,14 +18,11 @@ import time
 
 from selenium.webdriver.common.by import By
 
-app = Flask(__name__)
-
 test = True
 global case
 global config
 global chrome
 
-@app.route('/login')
 def main():
 
     global case
@@ -51,46 +46,16 @@ def main():
     options.add_argument('user-agent={0}'.format(user_agent))
     #options.add_argument("user-agent=User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
 
-    chrome = webdriver.Remote(command_executor='http://192.168.1.120:4444/wd/hub', options=options)
+    chrome = webdriver.Remote(command_executor='http://20.205.106.141:4445/wd/hub', options=options)
     chrome.maximize_window()
     #Chrome('./chromedriver_linux', chrome_options=options)
 
+
+
     chrome.get("https://web.whatsapp.com/")
-
-    return "succes"
-
-
-@app.route('/login_hp')
-def login_hp():
-    global chrome
-    #time.sleep(3)
+    time.sleep(3)
     #chrome.save_screenshot('whatsapp.png')
-    #time.sleep(32)
-    #os.unlink('wdocker hatsapp.png')
-    chrome.get("https://www.helperplace.com/")
-    time.sleep(4)
-    #chrome.save_screenshot('whatsapp.png')
-
-    login = chrome.find_element(By.XPATH, '//*[@id="togglebtn"]/ul/li[7]/a')
-    login.click()
-
-    time.sleep(2)
-
-    email = chrome.find_element(By.XPATH, '//*[@id="pills-home"]/div/div[1]/input')
-    email.send_keys("patrickkwanpccw@gmail.com")
-
-    password = chrome.find_element(By.XPATH, '//*[@id="pills-home"]/div/div[2]/input')
-    password.send_keys("patrick@pccw")
-
-    button = chrome.find_element(By.XPATH, '//*[@id="pills-home"]/div/div[5]/button')
-    button.click()
-
-    return "hp success"
-    #chrome.get('https://www.helperplace.com/candidate-shortlist/all?page=1')
-    #filter(chrome)
-    #time.sleep(5)
-    #numOfPage = int(pageLinks[len(pageLinks) - 2].text)
-    #go_page(chrome, 1)
+    time.sleep(32)
 
 
 def go_chrome(chrome, page):
@@ -124,7 +89,7 @@ def go_page(chrome, page):
     for helperNum in range(len(helpers)):
 
         if helperNum != 5:
-            print("\nListing in page " + str(page) + " of " +numOfPage+ ", helperNum "+str(helperNum+0) + " of " + str(len(helpers)))
+            print("\nListing in page " + str(page) + " of " +numOfPage+ ", helperNum="+str(helperNum) + " of " + str(len(helpers)))
             try:
                 helperElement= chrome.find_element(By.CLASS_NAME, "container-fluid").find_elements(By.XPATH, "div/div")[helperNum]
             except:
@@ -185,79 +150,110 @@ def go_page(chrome, page):
         wait_for_time(chrome)
         go_page(chrome, 1)
 
-@app.route("/send/<name>/<id>")
-def handle_helper_link(name,id):
 
-    global chrome
-    print(name)
-    print(id)
-
-    prefix="https://www.helperplace.com/resume/hong-kong/domestic-helper/"
-#    name='String => {}'.format(name)
-#    id='String => {}'.format(id)
-
-    helperLink=prefix+name+"/"+id
-    print(helperLink)
+def handle_helper_link(chrome, helperLink, page):
 
     print("\nclicking into helper detail")
 
+    con = sqlite3.connect('autohelperplace.db')
+    cursorObj = con.cursor()
+
     chrome.get(helperLink)
-
     time.sleep(5)
+    name = chrome.find_element(By.CLASS_NAME, "product-detail").find_element(By.XPATH, "h1").text.split(" ")[0]
+    subtitle = chrome.find_element(By.CLASS_NAME, 'listing-about-sub-title').text
+    position = chrome.find_element(By.CLASS_NAME, 'footer-experience').find_element(By.XPATH, "i").text
+    #contract = chrome.find_element(By.CLASS_NAME, 'footer-experience').find_element(By.XPATH, "i").text.split("|")[1]
+    #numofexp = chrome.find_element(By.XPATH,
+    #                               '/html/body/section/app-root/app-resumeview/section/section[2]/div/div[2]/div[1]/div/div/div/div/div[3]/div/div[2]/div[1]/h3').text
+    salaryText = chrome.find_element(By.XPATH, "//*[contains(text(),'Salary:')]")
 
-    contactBtn = chrome.find_element(By.XPATH, "//*[@title='Contact Candidate']")
-    contactBtn.click()
-    time.sleep(6)
-    calltab = chrome.find_element(By.XPATH, '// *[@id="calling-tab"]')
-    calltab.click()
-    time.sleep(6)
-    mobile = chrome.find_element(By.CLASS_NAME, "calling-btn").find_element(By.XPATH, "li/a/span").text.replace("=","").replace("-","")
-    print("mobile="+mobile)
+    if subtitle.find("Filipino") > -1:
+        nationality = "Filipino"
+    elif subtitle.find("Indonesian") > -1:
+        nationality = "Indonesian"
+    else:
+        nationality = "etc"
+
     try:
-        chrome.get("https://web.whatsapp.com/send/?phone="+mobile+"&text&type=phone_number&app_absent=0")
-        time.sleep(22)
-        chrome.find_element(By.XPATH, '//*[@title = "Type a message"]/p').send_keys("Hi "+name+ ". Are you looking for job?")
-        time.sleep(2)
-        chrome.find_element(By.XPATH, '//*[@data-testid = "send"]/..').click()
-
-#        time.sleep(5)
-
-
+        salary = salaryText.find_element(By.XPATH, '../h3[2]').text
+    except NoSuchElementException:
+        salary = salaryText.find_element(By.XPATH, '../h3[2]/span').text
+    try:
+        salary = int(salary.split("HK$")[1].replace("(≈", "").replace(")", "").replace(",", "").strip())
     except:
-        print("wrong in whatsapp")
+        salary = 10000
+    print("name="+name)
+    print("nationality="+nationality)
+    print("salary="+str(salary))
 
-    #msg = 'Hello ' + name + '!\nAre you looking for job?\nI have some Ma\'am is finding a ' + nationality + ' ' + position + '.\nThey are very interested to your profile.\n\nTo better present you to Ma\'am, I want you to fill up the form to let Ma\'am know you more.'
-    #msg += 'Or you may whatsapp me, +852 52768846 to discuss if you have more wish'
-    #chrome.find_element(By.XPATH, '//*[@id="message"]/div[1]/textarea').send_keys(msg)
-    #time.sleep(2)
-    #if not test:
-    #    contactSendBtn = chrome.find_element(By.XPATH, '// *[ @ id = "message"] / div[4] / button[2]')
-    #    contactSendBtn.click()
-    print("Msg Sent!")
-    return mobile
+    if salary > 6000:
+        print("\n******** Skip for high salary! ********\n")
+        #cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
+        cursorObj.execute("INSERT INTO helperlinks VALUES('" + helperLink + "', TIME(),'SALARY_HIGH')")
+        con.commit()
 
+    else:
+        contactBtn = chrome.find_element(By.XPATH, "//*[@title='Contact Candidate']")
+        contactBtn.click()
+        time.sleep(1)
+        calltab = chrome.find_element(By.XPATH, '// *[@id="calling-tab"]')
+        calltab.click()
+        time.sleep(1)
+        mobile = chrome.find_element(By.CLASS_NAME, "calling-btn").find_element(By.XPATH, "li/a/span").text.replace("=","").replace("-","")
+        print("mobile="+mobile)
+        try:
+            chrome.get("https://web.whatsapp.com/send/?phone="+mobile+"&text&type=phone_number&app_absent=0")
+            time.sleep(22)
+            chrome.find_element(By.XPATH, '//*[@title = "Type a message"]/p').send_keys("Hi "+name+ ". Are you looking for job?")
+            time.sleep(2)
+            chrome.find_element(By.XPATH, '//*[@data-testid = "send"]/..').click()
+
+            cursorObj.execute("INSERT INTO helperlinks VALUES('" + helperLink + "', TIME(),'SUCCESS')")
+            con.commit()
+            time.sleep(5)
+
+
+        except:
+            print("wrong in whatsapp")
+            cursorObj.execute("CREATE TABLE IF NOT EXISTS helperlinks (link text NOT NULL PRIMARY KEY)")
+            cursorObj.execute("INSERT INTO helperlinks VALUES('" + helperLink + "', TIME(),'WRONG_WHATSAPP')")
+            con.commit()
+
+        #msg = 'Hello ' + name + '!\nAre you looking for job?\nI have some Ma\'am is finding a ' + nationality + ' ' + position + '.\nThey are very interested to your profile.\n\nTo better present you to Ma\'am, I want you to fill up the form to let Ma\'am know you more.'
+        #msg += 'Or you may whatsapp me, +852 52768846 to discuss if you have more wish'
+        #chrome.find_element(By.XPATH, '//*[@id="message"]/div[1]/textarea').send_keys(msg)
+        #time.sleep(2)
+        #if not test:
+        #    contactSendBtn = chrome.find_element(By.XPATH, '// *[ @ id = "message"] / div[4] / button[2]')
+        #    contactSendBtn.click()
+        print("Msg Sent!")
+        global case
+        case = case + 1
+        print("case="+str(case))
+        if case >= int(config["settings"]["count"]):
+            wait_for_time(chrome)
+        else:
+            time.sleep(int(config["settings"]["time_after_msg"]))
 
 
 def wait_for_time(chrome):
     global case
     global config
-    ctime = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
 
     case = 0
     checktime = int(config["settings"]["checktime"])
     checkhour1 = int(config["settings"]["checkhour1"])
     checkhour2 = int(config["settings"]["checkhour2"])
     checkminute = int(config["settings"]["checkminute"])
-    hour = ctime.hour
-    minute = ctime.minute
+    hour = datetime.datetime.now().hour
+    minute = datetime.datetime.now().minute
     while not ((hour == checkhour1 or hour == checkhour2)
                and minute <= checkminute+checktime and minute >= checkminute-checktime):
-        hour = ctime.hour
-        minute = ctime.minute
+        hour = datetime.datetime.now().hour
+        minute = datetime.datetime.now().minute
         print("now is " + str(hour) + ":" + str(minute) + "... waiting")
-        chrome.get(config["settings"]["wait_link"])
+        chrome.get("https://www.google.com")
         time.sleep(checktime*60)
     print("now is " + str(hour) + ":" + str(minute) + "... start again")
-
-if __name__ == "__main__":
-    app.run(debug=True)
+main()

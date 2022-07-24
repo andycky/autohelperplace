@@ -1,4 +1,4 @@
-FROM python:3.9.13
+FROM python:3.9.13-slim-buster
 WORKDIR /usr/src/app
 COPY requirements.txt ./
 
@@ -28,6 +28,6 @@ RUN pip install --no-cache -r requirements.txt
 #COPY config/ ./
 #RUN ["chmod", "+x", "/usr/src/app/extract.sh"]
 #RUN ["chmod", "+x", "/usr/src/app/generate.sh"]
-CMD ["python","-u", "/usr/src/app/main.py"]
+CMD ["python","-u", "flask","run","--host=0.0.0.0"]
 #RUN python3 ./extract.py
 #RUN python3 ./generate.py
