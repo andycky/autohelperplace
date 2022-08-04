@@ -61,6 +61,10 @@ def get_chrome_connection():
 
     return chrome
 
+@app.route('/')
+def home():
+    return "Hello"
+
 
 @app.route('/login')
 def main():
