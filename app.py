@@ -238,5 +238,5 @@ def send_wa_msg(msg):
     wa_send_btn.click()
 
 
-#if __name__ == '__main__':
-#    app.run('0.0.0.0', 443, debug=True)
+if __name__ == '__main__':
+    app.run('0.0.0.0', 443, debug=True)
