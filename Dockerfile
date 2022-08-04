@@ -1,5 +1,5 @@
 FROM python:3.9.13-slim-buster
-WORKDIR /usr/src/app
+WORKDIR /python-docker
 COPY requirements.txt ./
 
 # Installed required tools
@@ -19,15 +19,16 @@ COPY requirements.txt ./
 #RUN python3 -m pip install --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.13.1-cp37-cp37m-linux_x86_64.whl
 #RUN pip3 --proxy http://172.23.4.18:8080 install -r requirements.txt
 #ENV HTTP_PROXY=http://172.23.4.18:8080
+RUN pip install --upgrade pip
 RUN pip install --no-cache -r requirements.txt
 #RUN apk del gcc musl-dev git g++ openssh hdf5 hdf5-dev
-
+ENV FLASK_DEBUG=1
 #VOLUME ["/usr/src/app/extracted"]
 #COPY ./ ./
 #RUN mkdir extracted
 #COPY config/ ./
 #RUN ["chmod", "+x", "/usr/src/app/extract.sh"]
 #RUN ["chmod", "+x", "/usr/src/app/generate.sh"]
-CMD ["python","-u", "flask","run","--host=0.0.0.0"]
+CMD ["python","-m", "flask","run","--host=0.0.0.0"]
 #RUN python3 ./extract.py
 #RUN python3 ./generate.py

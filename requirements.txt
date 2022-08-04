@@ -1,5 +1,4 @@
 selenium
 pytz
 Flask
-sqlite3
 configparser
