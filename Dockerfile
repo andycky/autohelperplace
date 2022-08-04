@@ -1,6 +1,8 @@
-FROM python:3.9.13-slim-buster
-WORKDIR /python-docker
-COPY requirements.txt ./
+FROM python:3.8-slim
+
+USER root
+COPY ./ /autohelper2
+WORKDIR /autohelper2
 
 # Installed required tools
 # https://stackoverflow.com/questions/39455741/gcc-error-trying-to-exec-cc1plus-execvp-no-such-file-or-directory
@@ -27,12 +29,11 @@ RUN pip install --no-cache -r requirements.txt
 #RUN apk del gcc musl-dev git g++ openssh hdf5 hdf5-dev
 ENV FLASK_DEBUG=1
 #VOLUME ["/usr/src/app/extracted"]
-COPY ./ ./
-#RUN mkdir extracted
-#COPY config/ ./
-#RUN ["chmod", "+x", "/usr/src/app/extract.sh"]
-#RUN ["chmod", "+x", "/usr/src/app/generate.sh"]
-EXPOSE 5000
-CMD ["python","-m", "flask","run","--host=0.0.0.0"]
+RUN chgrp -R 0 /<your-app> \
+    && chmod -R g=u /<your-app> \
+    && pip install pip --upgrade \
+    && pip install -r requirements.txt
+EXPOSE $PORT
+CMD gunicorn app:server --bind 0.0.0.0:$PORT --preload
 #RUN python3 ./extract.py
 #RUN python3 ./generate.py
