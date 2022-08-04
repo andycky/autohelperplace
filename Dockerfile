@@ -29,8 +29,8 @@ RUN pip install --no-cache -r requirements.txt
 #RUN apk del gcc musl-dev git g++ openssh hdf5 hdf5-dev
 ENV FLASK_DEBUG=1
 #VOLUME ["/usr/src/app/extracted"]
-RUN chgrp -R 0 /<your-app> \
-    && chmod -R g=u /<your-app> \
+RUN chgrp -R 0 /autohelper2 \
+    && chmod -R g=u /autohelper2 \
     && pip install pip --upgrade \
     && pip install -r requirements.txt
 EXPOSE $PORT
