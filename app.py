@@ -235,4 +235,4 @@ def send_wa_msg(msg):
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', 5000, debug=True)
+    app.run('0.0.0.0', 443, debug=True)
