@@ -26,7 +26,7 @@ def get_chrome():
     case = 0
 
     config = configparser.ConfigParser()
-    config.read('../config/config.properties')
+    config.read('config/config.properties')
 
     user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
 
@@ -234,5 +234,5 @@ def send_wa_msg(msg):
     wa_send_btn.click()
 
 
-#if __name__ == '__main__':
-#    app.run('0.0.0.0', 5000, debug=True)
+if __name__ == '__main__':
+    app.run('0.0.0.0', 443, debug=True)
